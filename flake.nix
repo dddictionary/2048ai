@@ -7,20 +7,27 @@
   outputs = { self, nixpkgs, ... }:
     let
       system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
+      pkgs = import nixpkgs {
+	inherit system;
+	config = {
+	  allowUnfree = true;
+	};
+      };
     in {
       devShells.x86_64-linux.default = pkgs.mkShell {
         nativeBuildInputs = with pkgs; [
           python312Packages.python
           python312Packages.pip
           python312Packages.tkinter
-          python312Packages.torchWithCuda
+          python312Packages.torch-bin
           python312Packages.matplotlib
           python312Packages.numpy
           python312Packages.ipython
         ];
-        shellHook =
-          "  # fixes libstdc++ issues and libgl.so issues\n  export LD_LIBRARY_PATH=${pkgs.stdenv.cc.cc.lib}/lib/\n";
+        shellHook = ''
+	  export LD_LIBRARY_PATH=${pkgs.stdenv.cc.cc.lib}/lib/
+	  export CUDA_PATH=${pkgs.cudatoolkit}
+	'';
       };
     };
 }
