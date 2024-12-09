@@ -106,6 +106,13 @@ def add_new_tile(board):
     board[tile_row_options[tile_loc], tile_col_options[tile_loc]] = tile_value
     return board
 
+def game_over(board):
+    # check to see if it is impossible to make a move
+    for move in [move_left, move_up, move_down, move_right]:
+        new_board, move_made, _ = move(board)
+        if move_made:
+            return False
+    return True
 
 def check_for_win(board):
     return 2048 in board

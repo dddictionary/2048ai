@@ -55,6 +55,10 @@ class Game2048Env:
         # Check game end conditions
         done = not move_made or check_for_win(new_board)
         
+        # Additional penalty if the game is over due to no valid moves left
+        if done and not check_for_win(new_board):
+            reward -= 100
+        
         self.board = new_board
         
         return self.board, reward, done

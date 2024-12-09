@@ -3,8 +3,9 @@ from game_functions import CELL_COUNT
 import torch
 from model import DQN
 from game_env import Game2048Env
+from tkinter import messagebox
 
-# import game_ai
+import game_ai
 import numpy as np
 import game_functions
 
@@ -68,8 +69,9 @@ class Display(Frame):
             DOWN_KEY: game_functions.move_down,
             LEFT_KEY: game_functions.move_left,
             RIGHT_KEY: game_functions.move_right,
-            AI_KEY: self.ai_single_move,
-            AI_PLAY_KEY: self.ai_continuous_play,
+            AI_PLAY_KEY: game_ai.ai_move,
+            # AI_KEY: self.ai_single_move,
+            # AI_PLAY_KEY: self.ai_continuous_play,
         }
 
         self.master.bind("<Key>", self.key_press)
@@ -175,17 +177,30 @@ class Display(Frame):
         self.update_idletasks()
 
     def key_press(self, event):
+        valid_game = True
         key = repr(event.char)
         if key in self.commands:
             if key == AI_PLAY_KEY:
                 # Direct call to ai_continuous_play without passing matrix
-                self.ai_continuous_play()
+                move_count = 0
+                while valid_game:
+                    self.matrix, valid_game = game_ai.ai_move(self.matrix,40, 30)
+                    if valid_game:
+                        self.matrix = game_functions.add_new_tile(self.matrix)
+                        self.draw_grid_cells()
+                    move_count += 1
+                    self.ai_continuous_play()
             else:
                 # For other commands, proceed as before
                 self.matrix, move_made, _ = self.commands[key](self.matrix)
                 if move_made:
                     self.matrix = game_functions.add_new_tile(self.matrix)
                     self.draw_grid_cells()
+                    
+                if game_functions.game_over(self.matrix):
+                    messagebox.showwarning("Game over", "No more moves available!")
+                    self.init_matrix()
+                    self.draw_grid_cells()
 
 
-gamegrid = Display(model_path="./snapshots/2048_dqn_model_ep900.pth")
+gamegrid = Display(model_path="./snapshots/2048_dqn_model_ep3500.pth")
