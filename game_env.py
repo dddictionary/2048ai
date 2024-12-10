@@ -44,6 +44,7 @@ class Game2048Env:
             
             # Additional reward for creating larger tiles
             max_tile = np.max(new_board)
+            # reward += np.log2(max_tile) * 0.5
             reward += max_tile * 0.1
             
             # Add new tile
@@ -83,7 +84,6 @@ class DQNAgent:
         self.epsilon_decay = 0.995
         
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        
         self.model = DQN(input_shape=state_size).to(self.device)
         self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
 
@@ -115,7 +115,7 @@ class DQNAgent:
         
         return action_index
 
-    def replay(self, batch_size=32):
+    def replay(self, batch_size=64):
         if len(self.memory) < batch_size:
             return
 
@@ -125,6 +125,8 @@ class DQNAgent:
             # Convert to tensors
             state = torch.FloatTensor(state.copy()).unsqueeze(0).unsqueeze(0).to(self.device)
             next_state = torch.FloatTensor(next_state.copy()).unsqueeze(0).unsqueeze(0).to(self.device)
+            reward = torch.tensor(reward).to(self.device)
+            done = torch.tensor(done).to(self.device)
             
             target = reward
             if not done:
@@ -134,7 +136,7 @@ class DQNAgent:
             current_q = self.model(state)[0][action]
             
             # Compute loss
-            loss = F.smooth_l1_loss(current_q, torch.tensor(target).to(self.device))
+            loss = F.smooth_l1_loss(current_q, target)
             
             # Backpropagation
             self.optimizer.zero_grad()
@@ -182,9 +184,17 @@ def train_agent(episodes=10000, max_steps=1000):
         
         print(f"Episode {episode}: Total Reward = {total_reward}")
         
+        # save the episode and reward to a csv
+        with open('rewards.csv', 'a') as f:
+            f.write(f"{episode},{total_reward}\n")
+        
         # Optionally save model periodically
-        if episode % 500 == 0:
-            torch.save(agent.model.state_dict(), f'./snapshots/2048_dqn_model_ep{episode}.pth')
+        if episode % 100 == 0:
+            torch.save(agent.model.state_dict(), f'./snapshots1/2048_dqn_model_ep{episode}.pth')
 
 if __name__ == "__main__":
+    # print(torch.cuda.is_available())
+    # print(torch.cuda.current_device())  # Should print a valid device index (e.g., 0)
+    # print(torch.cuda.get_device_name(torch.cuda.current_device()))  # Should print your GPU name
+    # print(next(agent.model.parameters()).device)  # Should print 'cuda:0'
     train_agent()

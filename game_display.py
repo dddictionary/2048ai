@@ -203,4 +203,4 @@ class Display(Frame):
                     self.draw_grid_cells()
 
 
-gamegrid = Display(model_path="./snapshots/2048_dqn_model_ep3500.pth")
+gamegrid = Display(model_path="./snapshots/2048_dqn_model_ep6500.pth")
