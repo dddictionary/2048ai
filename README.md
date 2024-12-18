@@ -12,35 +12,33 @@ python -m venv venv
 ```
 
 2. Enter the virtual environment:
-
 On Linux/macos:
-```bash
-source venv/bin/activate
-```
+  ```bash
+  source venv/bin/activate
+  ```
 On windows:
-```bash
-\venv\Scripts\activate
-```
-
+  ```bash
+  \venv\Scripts\activate
+  ```
 
 3. Install the packages
-```bash
-pip install -r requirements.txt
-```
+  ```bash
+  pip install -r requirements.txt
+  ```
 
 ## Running the application
 
 To run the training portion, please run 
 
-```bash
-python game_env.py
-```
+  ```bash
+  python game_env.py
+  ```
 
 To run the training portion, please run 
 
-```bash
-python game_display.py
-```
+  ```bash
+  python game_display.py
+  ```
 
 ## Playing
 
